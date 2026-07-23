@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TaskPriority {
+  Low
+  Medium
+  High
+}
+
+enum TaskStatus {
+  Pending
+  In_Progress
+  Completed
+}
+
+model User {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String   @db.VarChar(100)
+  email      String   @unique @db.VarChar(255)
+  password   String   @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  tasks Task[]
+}
+
+model Task {
+  id          String       @id @default(uuid()) @db.Uuid
+  user_id     String       @db.Uuid
+  title       String       @db.VarChar(255)
+  description String?      @db.Text
+  priority    TaskPriority @default(Medium)
+  status      TaskStatus   @default(Pending)
+  due_date    DateTime     @db.Date
+  created_at  DateTime     @default(now()) @db.Timestamptz
+  updated_at  DateTime     @default(now()) @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([status])
+  @@index([priority])
+  @@index([due_date])
+  @@index([created_at])
+}
